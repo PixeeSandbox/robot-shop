@@ -122,7 +122,7 @@ app.post('/login', (req, res) => {
         res.status(400).send('name or passowrd not supplied');
     } else if(mongoConnected) {
         usersCollection.findOne({
-            name: req.body.name,
+            name: req.body.name.toString(),
         }).then((user) => {
             req.log.info('user', user);
             if(user) {
@@ -143,8 +143,6 @@ app.post('/login', (req, res) => {
         res.status(500).send('database not available');
     }
 });
-
-// TODO - validate email address format
 app.post('/register', (req, res) => {
     req.log.info('register', req.body);
     if(req.body.name === undefined || req.body.password === undefined || req.body.email === undefined) {
@@ -152,16 +150,16 @@ app.post('/register', (req, res) => {
         res.status(400).send('insufficient data');
     } else if(mongoConnected) {
         // check if name already exists
-        usersCollection.findOne({name: req.body.name}).then((user) => {
+        usersCollection.findOne({name: req.body.name.toString()}).then((user) => {
             if(user) {
                 req.log.warn('user already exists');
                 res.status(400).send('name already exists');
             } else {
                 // create new user
                 usersCollection.insertOne({
-                    name: req.body.name,
-                    password: req.body.password,
-                    email: req.body.email
+                    name: req.body.name.toString(),
+                    password: req.body.password.toString(),
+                    email: req.body.email.toString()
                 }).then((r) => {
                     req.log.info('inserted', r.result);
                     res.send('OK');
