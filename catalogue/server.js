@@ -1,3 +1,4 @@
+const rateLimit = require('express-rate-limit');
 const instana = require('@instana/collector');
 // init tracing
 // MUST be done before loading anything else!
@@ -6,6 +7,8 @@ instana({
         enabled: true
     }
 });
+
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 
 const mongoClient = require('mongodb').MongoClient;
 const mongoObjectID = require('mongodb').ObjectID;
@@ -30,6 +33,7 @@ var mongoConnected = false;
 
 const app = express();
 
+app.use(limiter);
 app.use(expLogger);
 
 app.use((req, res, next) => {

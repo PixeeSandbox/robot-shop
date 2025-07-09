@@ -1,3 +1,4 @@
+const rateLimit = require('express-rate-limit');
 const instana = require('@instana/collector');
 // init tracing
 // MUST be done before loading anything else!
@@ -5,6 +6,11 @@ instana({
     tracing: {
         enabled: true
     }
+});
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
 });
 
 const mongoClient = require('mongodb').MongoClient;
@@ -34,6 +40,7 @@ const expLogger = expPino({
 const app = express();
 
 app.use(expLogger);
+app.use(limiter);
 
 app.use((req, res, next) => {
     res.set('Timing-Allow-Origin', '*');
